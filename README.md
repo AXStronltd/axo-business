@@ -25,7 +25,20 @@ docs/       POS-API.md — integrating a till / POS, webhooks, refunds, reports.
 
 ## Frontend
 
-The Hub is a single self-contained HTML file — open `frontend/index.html` in a browser. No build step.
+The Hub is plain HTML and JavaScript with no build step: `frontend/index.html` plus `frontend/live.js`. Serve the folder (or open `index.html` directly) and choose one of two modes:
+
+- **Sign in** with a business account (for example the seeded `owner@java.test` / `password123`). The Hub then talks to the real backend (set the address under **Server**, default `http://localhost:4000`) and shows:
+  - your real balance and today's takings
+  - payment requests with a scannable QR, updating by themselves the moment the customer pays
+  - payment toasts, transactions with refunds, and the daily settlement report with reconciliation
+  - Till & Paybill numbers, plus API keys and webhooks for your POS
+
+  Your role comes from the server. Tools that aren't connected to the API yet are hidden and say so.
+- **Explore the demo**: the original sample-data walkthrough, labelled **DEMO DATA**.
+
+```bash
+cd frontend && python3 -m http.server 8765    # then open http://127.0.0.1:8765
+```
 
 ## Backend
 
@@ -46,7 +59,7 @@ See **[AUDIT.md](AUDIT.md)** for the full capability matrix with evidence, and *
 
 - **Proven in a test environment:** the customer → merchant flow runs end to end over HTTP against a real Postgres in automated tests. A business raises a payment request for a sale, the customer scans and pays with a PIN, the request settles exactly once on both ledgers, the merchant gets a signed webhook, and refunds and the daily settlement report reconcile. 216 tests pass (`npm test`). Money units: KES in whole shillings; Somalia in USD cents.
 - **Not proven in production:** nothing has run against live money. Funding/withdrawal rails, WhatsApp production messaging, KYC/KYB, billers and crypto all need provider agreements and credentials. Holding customer funds needs an e-money licence or a licensed partner.
-- **The Hub frontend is demo-only.** It makes no API calls, and it now says so in a banner.
+- **The Hub frontend has a live mode.** Signing in connects it to the API for collections, refunds, reports, Till/Paybill and integrations, and it was tested end to end in a real browser. Its other tools (stock, payroll, credit…) are still demo-only and are hidden in live mode.
 
 ---
 

@@ -166,7 +166,7 @@ POS integration and webhooks: [`docs/POS-API.md`](../docs/POS-API.md).
 ## What is NOT built yet
 
 - **Customer P2P over HTTP** — `/customer/*` covers paying businesses, send-to-phone, reverse, recall and cash; a direct `POST /customer/transfers` (send to a @tag) over `sendP2P` is still WhatsApp-only.
-- **Hub frontend wiring** — `frontend/index.html` is demo data only (no API calls); see `AUDIT.md` §2.9.
+- **Hub frontend** — live mode (`frontend/live.js`) covers collections, refunds, reports, Till/Paybill and integrations. Stock, payroll, credit, invoices and onboarding are still demo-only; see `AUDIT.md` §5.
 - **Branches / tills / shifts**, staff invites, merchant fees (MDR), MFA, audit-log writes, rate limiting, metrics. See `AUDIT.md` §4.
 - **Cross-currency / cross-border P2P** — deliberately refused until a provider FX route is wired (the adapter layer is ready for it).
 - **Live ramp adapters** — the ramp interface, registry, sandbox, and an M-Pesa (Daraja) adapter *template* are built and tested; wiring the template to live STK push / B2C (and adding bank / agent adapters) needs real partner credentials (see below).
