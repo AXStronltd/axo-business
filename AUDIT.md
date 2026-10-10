@@ -233,6 +233,6 @@ Rows from §2 that changed. Evidence: `backend/test/payment-requests.e2e.test.ts
 
 **Still open (P2/P3):** wire the Hub frontend to the API; branches/tills/shifts with branch-scoped cashiers; staff invites; merchant fees (MDR); disputes; MFA; audit-log writes; rate limiting; metrics/alerting; CI and a container image; OpenAPI spec; agent self-login (agents run through the operator key today).
 
-**Note on currency units:** this codebase treats KES/UGX/TZS/RWF/SOS as zero-decimal (minor unit = 1 shilling; `chat.lib.ts currencyDecimals`). ISO 4217 gives KES two decimals. Changing it later would mean migrating every stored amount, so decide before going live. The existing e2e test's comments wrongly described amounts as cents; they're corrected.
+**Currency units — decided (Oct 2026):** KES (and UGX, TZS, RWF, SOS) are kept in **whole shillings**: 1 minor unit = 1 shilling, no cents. Every other currency uses its normal decimals. **Somalia transacts in USD, in cents** (a +252 number gets a USD wallet). The single rule is `currencyDecimals` in `chat.lib.ts`. An amount with more precision than its currency (e.g. `KES 12.50`) is refused, never rounded. Following the decision, the WhatsApp HISTORY and MINI statements and the credit notification were fixed: they printed USD amounts without cents (`USD 1250` instead of `USD 12.50`).
 
 **Same code elsewhere:** `axo-individual` and `axo-individual-repo-new` carry their own copies of this engine with the same S1–S9 holes. They weren't touched; they need the same fixes.
