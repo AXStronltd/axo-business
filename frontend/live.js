@@ -36,8 +36,14 @@
   function load(key) {
     try { var v = sessionStorage.getItem(key); return v ? JSON.parse(v) : null; } catch (e) { return null; }
   }
+  // ?api=… in the page URL picks the server (and is remembered), e.g. for a
+  // staging API or a test run; otherwise the last one used, or localhost.
   function savedApiBase() {
-    try { return localStorage.getItem(API_KEY_STORE) || DEFAULT_API; } catch (e) { return DEFAULT_API; }
+    try {
+      var q = new URLSearchParams(location.search).get('api');
+      if (q) { localStorage.setItem(API_KEY_STORE, q.replace(/\/+$/, '')); return q.replace(/\/+$/, ''); }
+      return localStorage.getItem(API_KEY_STORE) || DEFAULT_API;
+    } catch (e) { return DEFAULT_API; }
   }
   function rememberApiBase(b) { try { localStorage.setItem(API_KEY_STORE, b); } catch (e) {} }
 
@@ -838,6 +844,6 @@
     startSession().catch(function () { endSession(); });
   }
   var apiInput = document.getElementById('siApi');
-  if (apiInput && !apiInput.value) apiInput.value = savedApiBase();
+  if (apiInput) apiInput.value = savedApiBase();
   chrome();
 })();
