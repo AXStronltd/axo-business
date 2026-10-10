@@ -555,9 +555,12 @@
   .lfin h2{font-size:26px;font-weight:800;margin:0 0 10px}
   .lfin p{font-size:14px;color:var(--dim);margin:0 auto 22px;max-width:320px;line-height:1.5}
   .lfoot{padding:20px;text-align:center;font-size:11px;color:var(--dim2);border-top:1px solid var(--line);line-height:1.6}
+  /* Demo banner: this page is not connected to the Axo API (see AUDIT.md §2.9) */
+  .demo-banner{position:sticky;top:0;z-index:9999;background:#b45309;color:#fff;font:600 12px/1.4 system-ui,sans-serif;text-align:center;padding:6px 12px;padding-top:calc(6px + env(safe-area-inset-top,0px))}
 </style>
 </head>
 <body>
+<div class="demo-banner" role="status">DEMO DATA — this dashboard is not connected to the Axo API. Balances, payments and "Simulate" actions are not real money.</div>
 <div class="app">
   <!-- ============ SIGN IN (business-ready, normal login) ============ -->
   <div class="sign-wrap" id="signWrap">
@@ -1275,7 +1278,7 @@ function createPay(kind){
   const note=$('#cpNote').value.trim();
   if(kind==='link'){
     const slug=Math.random().toString(36).slice(2,8);
-    $('#sheet').innerHTML=`<div class="sheet-grip"></div><div style="text-align:center;padding:6px 0"><div style="font-size:40px">🔗</div><h3>Payment link ready</h3><div class="sub" style="color:var(--dim);font-size:12.5px;margin-bottom:12px">${money(amt)}${note?' · '+note:''}</div><div class="api-key"><div class="ak-l">Share this link</div><div class="ak-v">axo.money/pay/${slug} <span class="cp" onclick="toast('Link copied')">copy</span></div></div><button class="big-btn" onclick="toast('Shared on WhatsApp');closeSheet()">🟢 Share on WhatsApp</button><button class="big-btn ghost" style="margin-top:8px" onclick="simPay(${amt},'Payment link')">Simulate customer paying</button></div>`;
+    $('#sheet').innerHTML=`<div class="sheet-grip"></div><div style="text-align:center;padding:6px 0"><div style="font-size:40px">🔗</div><h3>Payment link ready</h3><div class="sub" style="color:var(--dim);font-size:12.5px;margin-bottom:12px">${money(amt)}${note?' · '+note:''}</div><div class="api-key"><div class="ak-l">Share this link</div><div class="ak-v">axo.money/pay/${slug} <span class="cp" onclick="copyInvoiceLink('${inv.no}')">copy</span></div></div><button class="big-btn" onclick="toast('Shared on WhatsApp');closeSheet()">🟢 Share on WhatsApp</button><button class="big-btn ghost" style="margin-top:8px" onclick="simPay(${amt},'Payment link')">Simulate customer paying</button></div>`;
   }else{
     const phone=($('#cpPhone')&&$('#cpPhone').value.trim())||'the customer';
     $('#sheet').innerHTML=`<div class="sheet-grip"></div><div style="text-align:center;padding:6px 0"><div class="spin" style="margin:18px auto"></div><h3>Request sent</h3><div class="sub" style="color:var(--dim);font-size:12.5px">Waiting for ${phone} to approve ${money(amt)} on their phone…</div><button class="big-btn" style="margin-top:16px" onclick="simPay(${amt},'Axo Pay')">Simulate approval</button><button class="big-btn ghost" style="margin-top:8px" onclick="closeSheet()">Close</button></div>`;
@@ -2914,10 +2917,12 @@ function invoiceDetail(no){
     ${s==='Draft'?`<button class="big-btn" style="margin-top:12px" onclick="issueInvoice('${inv.no}')">Issue invoice</button>`:''}
     ${(s==='Issued'||s==='Partially paid'||s==='Overdue')?`
       <div class="api-key" style="margin-top:12px"><div class="ak-l">Pay link (Axo · no SIM)</div><div class="ak-v">${pay} <span class="cp" onclick="toast('Link copied')">copy</span></div></div>
-      <button class="big-btn" style="margin-top:10px" onclick="recordPaymentSheet('${inv.no}')">Record a payment</button>
+      <button class="big-btn" style="margin-top:10px" onclick="sendInvoiceWhatsApp('${inv.no}')">Send invoice on WhatsApp</button>
+      <button class="big-btn ghost" style="margin-top:8px" onclick="shareInvoiceLink('${inv.no}')">Share payment link</button>
+      <button class="big-btn ghost" style="margin-top:8px" onclick="recordPaymentSheet('${inv.no}')">Record a payment</button>
       <button class="big-btn ghost" style="margin-top:8px" onclick="toast('🟢 Reminder sent on WhatsApp')">Send reminder on WhatsApp</button>`:''}
     ${s==='Paid'?`<div class="note-line" style="margin-top:10px">✅ Fully paid. Reconciled to transactions.</div>`:''}
-    <button class="big-btn ghost" style="margin-top:8px" onclick="toast('PDF generated (front-end stage)')">⬇️ Download PDF</button>
+    <button class="big-btn ghost" style="margin-top:8px" onclick="downloadInvoicePDF('${inv.no}')">⬇️ Download / print PDF</button>
     <button class="big-btn ghost" style="margin-top:8px" onclick="customerStatement('${inv.cust.replace(/'/g,'')}')">📄 Customer statement</button>
     ${s!=='Paid'&&s!=='Cancelled'?`<button class="big-btn ghost" style="margin-top:8px;color:var(--rose)" onclick="cancelInvoice('${inv.no}')">Cancel invoice</button>`:''}`;
   $('#sheetBg').classList.add('on');
@@ -2982,7 +2987,77 @@ function recordPayment(no,method){
   closeSheet(); render();
   toast(invDue(inv)<=0.001?'✅ '+no+' paid in full':'💰 '+money(amt)+' recorded · balance '+money(invDue(inv)));
 }
-function cancelInvoice(no){const inv=INVOICES.find(x=>x.no===no);if(!inv)return;inv.st='Cancelled';closeSheet();render();toast(no+' cancelled');}
+function cancelInvoice(no){
+  const inv=INVOICES.find(x=>x.no===no);
+  if(!inv)return;
+  if(!confirm('Cancel '+no+' for '+inv.cust+'? This changes the local demo invoice status.'))return;
+  inv.st='Cancelled';
+  closeSheet();render();toast(no+' cancelled');
+}
+
+function invoiceForAction(no){return INVOICES.find(x=>x.no===no);}
+function invoicePayLink(inv){
+  const b=BUSINESSES[CUR];
+  return 'https://axo.money/pay/'+((b&&b.name||'shop').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,8))+'/'+inv.no.toLowerCase();
+}
+function copyInvoiceLink(no){
+  const inv=invoiceForAction(no);if(!inv)return;
+  const link=invoicePayLink(inv);
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link)
+      .then(()=>toast('Demo payment link copied'))
+      .catch(()=>prompt('Copy this demo payment link (not live yet):',link));
+  }else{
+    prompt('Copy this demo payment link (not live yet):',link);
+  }
+}
+function shareInvoiceLink(no){
+  const inv=invoiceForAction(no);if(!inv)return;
+  const link=invoicePayLink(inv);
+  const message='Invoice '+inv.no+' from '+((BUSINESSES[CUR]||{}).name||'our business')+
+    '. Amount due: '+money(invDue(inv))+'. Payment link: '+link+
+    '\\n\\nNote: this is a demo link and is not configured to collect payments.';
+  if(navigator.share){
+    navigator.share({title:'Invoice '+inv.no,text:message,url:link})
+      .catch(()=>{});
+  }else{
+    copyInvoiceLink(no);
+  }
+}
+function sendInvoiceWhatsApp(no){
+  const inv=invoiceForAction(no);if(!inv)return;
+  const link=invoicePayLink(inv);
+  const message='Hello '+inv.cust+', here is invoice '+inv.no+
+    '. Total: '+money(invTotal(inv))+'. Paid: '+money(inv.paid||0)+
+    '. Balance due: '+money(invDue(inv))+'. Due date: '+(inv.due||'not specified')+
+    '. Payment link: '+link+
+    '. Please note this is a demo payment link and cannot collect payments yet.';
+  window.open('https://wa.me/?text='+encodeURIComponent(message),'_blank','noopener');
+}
+function downloadInvoicePDF(no){
+  const inv=invoiceForAction(no);if(!inv)return;
+  const b=BUSINESSES[CUR]||{};
+  const esc=v=>String(v==null?'':v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const rows=inv.items.map(it=>'<tr><td>'+esc(it[0])+'</td><td>'+esc(it[1])+'</td><td>'+esc(money(it[2]))+'</td><td>'+esc(money(it[1]*it[2]))+'</td></tr>').join('');
+  const doc='<!doctype html><html><head><meta charset="utf-8"><title>'+esc(inv.no)+'</title><style>'+
+    'body{font:14px Arial,sans-serif;color:#222;margin:40px}h1{margin-bottom:4px}small{color:#666}'+
+    'table{width:100%;border-collapse:collapse;margin-top:24px}th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left}'+
+    '.total{text-align:right;margin-top:20px;line-height:2}.muted{color:#666}'+
+    '@media print{button{display:none}body{margin:15mm}}'+
+    '</style></head><body><h1>INVOICE</h1><small>'+esc(inv.no)+' · '+esc(invState(inv))+'</small>'+
+    '<p><b>'+esc(b.name||'Business')+'</b><br>Invoice to: '+esc(inv.cust)+
+    (inv.phone?'<br>'+esc(inv.phone):'')+'</p><p>Issued: '+esc(inv.issued||'Not issued')+
+    '<br>Due date: '+esc(inv.due||'Not specified')+'</p><table><thead><tr><th>Description</th><th>Qty</th><th>Unit price</th><th>Amount</th></tr></thead><tbody>'+
+    rows+'</tbody></table><div class="total">Subtotal: <b>'+esc(money(invSub(inv)))+'</b><br>Tax ('+
+    esc(inv.taxRate||0)+'%): <b>'+esc(money(invTax(inv)))+'</b><br>Total: <b>'+esc(money(invTotal(inv)))+
+    '</b><br>Paid: <b>'+esc(money(inv.paid||0))+'</b><br>Balance due: <b>'+esc(money(invDue(inv)))+
+    '</b></div><p class="muted">Generated from the Axo Business frontend demo.</p><button onclick="window.print()">Print / Save as PDF</button>'+
+    '<script>window.onload=()=>setTimeout(()=>window.print(),250)<\/script></body></html>';
+  const w=window.open('','_blank');
+  if(!w){toast('Allow pop-ups to print or save the invoice PDF');return;}
+  w.document.open();w.document.write(doc);w.document.close();
+}
+
 function customerStatement(cust){
   const rows=INVOICES.filter(i=>i.cust===cust&&i.st!=='Cancelled');
   const billed=rows.reduce((s,i)=>s+invTotal(i),0);

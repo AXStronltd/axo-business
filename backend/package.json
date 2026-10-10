@@ -2,17 +2,19 @@
   "name": "axo-business-backend",
   "version": "0.1.0",
   "private": true,
-  "description": "Axo Business backend — telco-free merchant payments platform. Phase 1+2: foundation, auth, double-entry ledger, first tested payment workflow.",
+  "description": "Axo Business backend \u2014 telco-free merchant payments platform. Phase 1+2: foundation, auth, double-entry ledger, first tested payment workflow.",
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc -p tsconfig.json",
+    "dev": "node --env-file=.env --import tsx --watch src/server.ts",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
-    "seed": "tsx prisma/seed.ts",
+    "seed": "node --env-file=.env --import tsx prisma/seed.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"

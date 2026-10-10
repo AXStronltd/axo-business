@@ -13,9 +13,11 @@ frontend/   The merchant dashboard — a self-contained single-page app
             (open frontend/index.html in a browser).
 backend/    The money engine the Hub runs on — TypeScript · Fastify · PostgreSQL
             (Prisma). A double-entry ledger, idempotency, pay-a-business, STK-style
-            push, cash-in/out ramps (agent, M-Pesa template, crypto), airtime &
-            bills, account recovery, risk controls, and the WhatsApp Cloud API
-            gateway. See backend/README.md for the full feature list and tests.
+            push, payment requests for POS/QR, signed merchant webhooks, refunds,
+            daily settlement, cash-in/out ramps (agent, M-Pesa template, crypto),
+            account recovery, risk controls, and the WhatsApp Cloud API gateway.
+            See backend/README.md for the full feature list and tests.
+docs/       POS-API.md — integrating a till / POS, webhooks, refunds, reports.
 ```
 
 > The backend is the same money engine that powers the Axo for Individual app —
@@ -35,12 +37,16 @@ npm install
 npm run prisma:migrate
 npm run seed                # demo merchant + wallets; agent AMRAN
 npm run dev                 # http://localhost:4000/health
-npm test                    # 155 tests
+npm test                    # 216 tests (DB e2e tests skip without Postgres)
 ```
 
 ## Status
 
-Built and covered by automated tests (155 passing). It has **not** yet run against a real database or a live payment rail, and moving customer money is regulated. Going live needs the rails, a security audit, and licensing (or a licensed partner). See `backend/README.md`.
+See **[AUDIT.md](AUDIT.md)** for the full capability matrix with evidence, and **[docs/POS-API.md](docs/POS-API.md)** for the POS / payments integration guide.
+
+- **Proven in a test environment:** the customer → merchant flow runs end to end over HTTP against a real Postgres in automated tests. A business raises a payment request for a sale, the customer scans and pays with a PIN, the request settles exactly once on both ledgers, the merchant gets a signed webhook, and refunds and the daily settlement report reconcile. 216 tests pass (`npm test`). Money units: KES in whole shillings; Somalia in USD cents.
+- **Not proven in production:** nothing has run against live money. Funding/withdrawal rails, WhatsApp production messaging, KYC/KYB, billers and crypto all need provider agreements and credentials. Holding customer funds needs an e-money licence or a licensed partner.
+- **The Hub frontend is demo-only.** It makes no API calls, and it now says so in a banner.
 
 ---
 
