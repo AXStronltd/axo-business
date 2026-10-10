@@ -556,7 +556,9 @@
   .lfin p{font-size:14px;color:var(--dim);margin:0 auto 22px;max-width:320px;line-height:1.5}
   .lfoot{padding:20px;text-align:center;font-size:11px;color:var(--dim2);border-top:1px solid var(--line);line-height:1.6}
   /* Demo banner: this page is not connected to the Axo API (see AUDIT.md §2.9) */
-  .demo-banner{position:sticky;top:0;z-index:9999;background:#b45309;color:#fff;font:600 12px/1.4 system-ui,sans-serif;text-align:center;padding:6px 12px;padding-top:calc(6px + env(safe-area-inset-top,0px))}
+  /* below 960px body is a centred flex row: let the banner take its own full-width row above the app */
+  body{flex-wrap:wrap;align-content:flex-start}
+  .demo-banner{flex:0 0 100%;width:100%;box-sizing:border-box;position:sticky;top:0;z-index:9999;background:#b45309;color:#fff;font:600 12px/1.4 system-ui,sans-serif;text-align:center;padding:6px 12px;padding-top:calc(6px + env(safe-area-inset-top,0px))}
 </style>
 </head>
 <body>
@@ -567,16 +569,21 @@
     <div class="sign-logo">ax</div>
     <h1>Sign in to Axo Business</h1>
     <p>Your merchant dashboard — payments, settlements, team & security.</p>
-    <div class="sign-field"><label>EMAIL OR PHONE</label><input id="siEmail" placeholder="you@business.com" autocomplete="username"></div>
-    <div class="sign-field"><label>PASSWORD / AXO CODE</label><input id="siPass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
-    <div class="sign-field"><label>SIGN IN AS</label>
+    <div class="sign-field"><label>EMAIL</label><input id="siEmail" type="email" placeholder="you@business.com" autocomplete="username"></div>
+    <div class="sign-field"><label>PASSWORD</label><input id="siPass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doSignIn()"></div>
+    <details style="margin:-4px 0 12px;font-size:12.5px;color:var(--dim)"><summary style="cursor:pointer">Server</summary>
+      <div class="sign-field" style="margin-top:8px"><label>AXO API</label><input id="siApi" placeholder="http://localhost:4000" autocomplete="off" spellcheck="false"></div></details>
+    <div id="siMsg" role="status" style="min-height:18px;font-size:13px;color:var(--rose);margin-bottom:8px"></div>
+    <button class="sign-btn" onclick="doSignIn()">Sign in</button>
+    <div style="margin:18px 0 8px;font-size:12px;color:var(--dim);text-align:center">— or try it without an account —</div>
+    <div class="sign-field"><label>DEMO ROLE</label>
       <select id="siRole" style="width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--txt);font-size:15px;font-family:var(--font)">
         <option value="owner">Owner — full access</option>
         <option value="manager">Manager — run the shop</option>
         <option value="cashier">Cashier — till only</option>
         <option value="accountant">Accountant — money & books</option>
       </select></div>
-    <button class="sign-btn" onclick="doSignIn()">Sign in</button>
+    <button class="sign-btn" style="background:transparent;border:1px solid var(--line2);color:var(--txt)" onclick="liveExploreDemo()">Explore the demo (sample data)</button>
     <p style="margin-top:16px">New here? <span onclick="closeSignIn();startRegister()" style="color:var(--axo);cursor:pointer;font-weight:700">Create a business account</span></p>
   </div>
 
@@ -683,7 +690,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sb-brand"><div class="sb-logo">ax</div><div><div class="sb-name">Axo Business</div><div class="sb-sub" id="sbBiz">Supermarket</div></div></div>
     <nav class="sb-nav" id="sbNav"></nav>
-    <div class="sb-foot"><div class="sb-env">● Production</div><div class="sb-demo" onclick="reopenOnb()">⇄ Switch demo business</div></div>
+    <div class="sb-foot"><div class="sb-env">● Demo data</div><div class="sb-demo" onclick="reopenOnb()">⇄ Switch demo business</div></div>
   </aside>
 
   <div class="main">
@@ -3996,6 +4003,8 @@ function startRegister(){
 /* App starts on the landing page (#land is first in DOM, on top).
    Register → startRegister() → onboarding → dashboard. */
 </script>
+<!-- Live API mode: real sign-in, balances, payment requests and reports (see live.js). -->
+<script src="live.js"></script>
 <script>
 /* ---- Installable desktop/PWA app ---- */
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}

@@ -66,7 +66,7 @@ X-Api-Key: axo_sk_…
 | `customerTag` / `customerWaId` | no | Targets one customer: the request is pushed to their WhatsApp and only they can pay it (the STK-push equivalent). Omit for an open QR any customer can pay. |
 | `ttlSeconds` | no | 60–86400. Defaults: 15 min open, 2 min targeted. |
 
-Show `qr` as a QR code. The QR carries **only the ref**. The amount and payee always come from the server, so editing a printed QR can't change what is charged.
+Show `qr` as a QR code — or fetch it ready-made as an SVG image from `GET /payment-requests/:id/qr.svg` (same auth). The QR carries **only the ref**. The amount and payee always come from the server, so editing a printed QR can't change what is charged.
 
 ## 3. The customer pays
 

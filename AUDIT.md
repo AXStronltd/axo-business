@@ -86,7 +86,7 @@ These outrank every feature gap. Each one either lets money move without the own
 | Risk screening on merchant payments | 5 | S10 |
 | Merchant fee / MDR | 5 | Merchant payments post `feeMinor: 0`; there is no fee schedule |
 | Merchant notification of a payment | 5 | Customer gets a WhatsApp reply; the merchant gets nothing (no WhatsApp, no webhook, no push) |
-| Business dashboard shows the payment | 3 | API `GET /transactions?since=` works (e2e); **the Hub frontend never calls it** (see 2.9) |
+| Business dashboard shows the payment | 3 | API `GET /transactions?since=` works (e2e); **the Hub frontend never calls it** (see 2.9). *Since fixed — see §5.* |
 
 ### 2.4 Ledger, idempotency, webhooks
 
@@ -203,7 +203,7 @@ Order is by dependency and risk. Fix the money-safety holes first, then complete
 - [x] POS API keys (hashed, fixed `cashier`/`manager` role, can't mint keys or edit webhooks).
 - [ ] Branches and tills; cashiers scoped to a branch.
 - [ ] Staff invite / user management.
-- [ ] Wire the Hub frontend to the live API (login, collect, transactions). *Done so far: a persistent "DEMO DATA" banner.*
+- [x] Wire the Hub frontend to the live API: sign-in, balance, payment requests with real QR, live payment notifications, transactions + refunds, settlements, Till/Paybill, API keys/webhooks (`frontend/live.js`). Demo-only tools are hidden in live mode.
 - [x] POS + webhook documentation: `docs/POS-API.md` (an OpenAPI file is still to do).
 
 **P3 — production**
@@ -229,9 +229,10 @@ Rows from §2 that changed. Evidence: `backend/test/payment-requests.e2e.test.ts
 | Pay over WhatsApp (`PAY TILL` → PIN) | 2 | **1** |
 | Idempotency key scoping | 3 | **1** |
 | Refuse to run live with unsafe config | 5 | **1** (unit-tested, and the built server refuses to start) |
-| Hub frontend | 4 | 4, now labelled as demo |
+| Hub frontend | 4 | **2** for the connected screens (driven end to end in headless Chrome against the sandbox API; no automated frontend test in the repo yet); **4** for the tools still on sample data, now hidden in live mode |
+| QR codes | 4 (random squares) | **1**: real, scannable SVG rendered by the backend (`/payment-requests/:id/qr.svg`, `/collect/qr`) |
 
-**Still open (P2/P3):** wire the Hub frontend to the API; branches/tills/shifts with branch-scoped cashiers; staff invites; merchant fees (MDR); disputes; MFA; audit-log writes; rate limiting; metrics/alerting; CI and a container image; OpenAPI spec; agent self-login (agents run through the operator key today).
+**Still open (P2/P3):** connect the remaining Hub tools (stock, orders, invoices, payroll…) and the onboarding flow (`POST /merchants`); an automated frontend test; branches/tills/shifts with branch-scoped cashiers; staff invites; merchant fees (MDR); disputes; MFA; audit-log writes; rate limiting; metrics/alerting; CI and a container image; OpenAPI spec; agent self-login (agents run through the operator key today).
 
 **Currency units — decided (Oct 2026):** KES (and UGX, TZS, RWF, SOS) are kept in **whole shillings**: 1 minor unit = 1 shilling, no cents. Every other currency uses its normal decimals. **Somalia transacts in USD, in cents** (a +252 number gets a USD wallet). The single rule is `currencyDecimals` in `chat.lib.ts`. An amount with more precision than its currency (e.g. `KES 12.50`) is refused, never rounded. Following the decision, the WhatsApp HISTORY and MINI statements and the credit notification were fixed: they printed USD amounts without cents (`USD 1250` instead of `USD 12.50`).
 
