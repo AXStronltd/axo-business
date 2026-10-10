@@ -236,4 +236,6 @@ Rows from §2 that changed. Evidence: `backend/test/payment-requests.e2e.test.ts
 
 **Currency units — decided (Oct 2026):** KES (and UGX, TZS, RWF, SOS) are kept in **whole shillings**: 1 minor unit = 1 shilling, no cents. Every other currency uses its normal decimals. **Somalia transacts in USD, in cents** (a +252 number gets a USD wallet). The single rule is `currencyDecimals` in `chat.lib.ts`. An amount with more precision than its currency (e.g. `KES 12.50`) is refused, never rounded. Following the decision, the WhatsApp HISTORY and MINI statements and the credit notification were fixed: they printed USD amounts without cents (`USD 1250` instead of `USD 12.50`).
 
+**Engine sync (Oct 2026):** the customer send-to-@tag route (`POST /customer/transfers`), the "pay me" QR (`GET /customer/receive-qr.svg`) and a `sendP2P` guard that refuses the internal clearing wallets (it also closes a WhatsApp `SEND … to @axo_clearing_kes` hole) were added with the wallet frontend in `axo-individual-repo-new` and synced here, so both repos' `backend/src` are identical.
+
 **Same code elsewhere:** `axo-individual` and `axo-individual-repo-new` carry their own copies of this engine with the same S1–S9 holes. They weren't touched; they need the same fixes.

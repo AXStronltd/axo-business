@@ -50,14 +50,14 @@ npm install
 npm run prisma:migrate
 npm run seed                # demo merchant + wallets; agent AMRAN
 npm run dev                 # http://localhost:4000/health
-npm test                    # 216 tests (DB e2e tests skip without Postgres)
+npm test                    # 223 tests (DB e2e tests skip without Postgres)
 ```
 
 ## Status
 
 See **[AUDIT.md](AUDIT.md)** for the full capability matrix with evidence, and **[docs/POS-API.md](docs/POS-API.md)** for the POS / payments integration guide.
 
-- **Proven in a test environment:** the customer → merchant flow runs end to end over HTTP against a real Postgres in automated tests. A business raises a payment request for a sale, the customer scans and pays with a PIN, the request settles exactly once on both ledgers, the merchant gets a signed webhook, and refunds and the daily settlement report reconcile. 216 tests pass (`npm test`). Money units: KES in whole shillings; Somalia in USD cents.
+- **Proven in a test environment:** the customer → merchant flow runs end to end over HTTP against a real Postgres in automated tests. A business raises a payment request for a sale, the customer scans and pays with a PIN, the request settles exactly once on both ledgers, the merchant gets a signed webhook, and refunds and the daily settlement report reconcile. 223 tests pass (`npm test`). Money units: KES in whole shillings; Somalia in USD cents.
 - **Not proven in production:** nothing has run against live money. Funding/withdrawal rails, WhatsApp production messaging, KYC/KYB, billers and crypto all need provider agreements and credentials. Holding customer funds needs an e-money licence or a licensed partner.
 - **The Hub frontend has a live mode.** Signing in connects it to the API for collections, refunds, reports, Till/Paybill and integrations, and it was tested end to end in a real browser. Its other tools (stock, payroll, credit…) are still demo-only and are hidden in live mode.
 
