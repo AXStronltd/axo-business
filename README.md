@@ -13,11 +13,9 @@ frontend/   The merchant dashboard — a self-contained single-page app
             (open frontend/index.html in a browser).
 backend/    The money engine the Hub runs on — TypeScript · Fastify · PostgreSQL
             (Prisma). A double-entry ledger, idempotency, pay-a-business, STK-style
-            push, payment requests for POS/QR, signed merchant webhooks, refunds,
-            daily settlement, cash-in/out ramps (agent, M-Pesa template, crypto),
-            account recovery, risk controls, and the WhatsApp Cloud API gateway.
-            See backend/README.md for the full feature list and tests.
-docs/       POS-API.md — integrating a till / POS, webhooks, refunds, reports.
+            push, cash-in/out ramps (agent, M-Pesa template, crypto), airtime &
+            bills, account recovery, risk controls, and the WhatsApp Cloud API
+            gateway. See backend/README.md for the full feature list and tests.
 ```
 
 > The backend is the same money engine that powers the Axo for Individual app —
@@ -25,20 +23,7 @@ docs/       POS-API.md — integrating a till / POS, webhooks, refunds, reports.
 
 ## Frontend
 
-The Hub is plain HTML and JavaScript with no build step: `frontend/index.html` plus `frontend/live.js`. Serve the folder (or open `index.html` directly) and choose one of two modes:
-
-- **Sign in** with a business account (for example the seeded `owner@java.test` / `password123`). The Hub then talks to the real backend (set the address under **Server**, default `http://localhost:4000`) and shows:
-  - your real balance and today's takings
-  - payment requests with a scannable QR, updating by themselves the moment the customer pays
-  - payment toasts, transactions with refunds, and the daily settlement report with reconciliation
-  - Till & Paybill numbers, plus API keys and webhooks for your POS
-
-  Your role comes from the server. Tools that aren't connected to the API yet are hidden and say so.
-- **Explore the demo**: the original sample-data walkthrough, labelled **DEMO DATA**.
-
-```bash
-cd frontend && python3 -m http.server 8765    # then open http://127.0.0.1:8765
-```
+The Hub is a single self-contained HTML file — open `frontend/index.html` in a browser. No build step.
 
 ## Backend
 
@@ -49,17 +34,13 @@ docker compose up -d        # Postgres + Redis
 npm install
 npm run prisma:migrate
 npm run seed                # demo merchant + wallets; agent AMRAN
-npm run dev                 # http://localhost:4000/health
-npm test                    # 223 tests (DB e2e tests skip without Postgres)
+npm run dev                 # http://localhost:4001/health
+npm test                    # 165 tests
 ```
 
 ## Status
 
-See **[AUDIT.md](AUDIT.md)** for the full capability matrix with evidence, and **[docs/POS-API.md](docs/POS-API.md)** for the POS / payments integration guide.
-
-- **Proven in a test environment:** the customer → merchant flow runs end to end over HTTP against a real Postgres in automated tests. A business raises a payment request for a sale, the customer scans and pays with a PIN, the request settles exactly once on both ledgers, the merchant gets a signed webhook, and refunds and the daily settlement report reconcile. 223 tests pass (`npm test`). Money units: KES in whole shillings; Somalia in USD cents.
-- **Not proven in production:** nothing has run against live money. Funding/withdrawal rails, WhatsApp production messaging, KYC/KYB, billers and crypto all need provider agreements and credentials. Holding customer funds needs an e-money licence or a licensed partner.
-- **The Hub frontend has a live mode.** Signing in connects it to the API for collections, refunds, reports, Till/Paybill and integrations, and it was tested end to end in a real browser. Its other tools (stock, payroll, credit…) are still demo-only and are hidden in live mode.
+Built and covered by automated tests (165 passing). It has **not** yet run against a real database or a live payment rail, and moving customer money is regulated. Going live needs the rails, a security audit, and licensing (or a licensed partner). See `backend/README.md`.
 
 ---
 
