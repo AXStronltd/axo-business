@@ -1,0 +1,5 @@
+# The Hub is plain HTML with no build step: publish the frontend folder as is.
+[build]
+  base = "frontend"
+  publish = "."
+  command = "echo 'no build step'"
