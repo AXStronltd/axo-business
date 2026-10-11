@@ -118,6 +118,7 @@ These outrank every feature gap. Each one either lets money move without the own
 | M-Pesa ramp | 6 | `providers/ramp.mpesa.ts` throws "not implemented" by design; needs Daraja credentials and a Safaricom agreement. (Using M-Pesa as a funding rail is allowed by the brief; making it the *foundation* is not.) |
 | Crypto ramp | 6 | `providers/ramp.crypto.ts`; needs a custody/VASP partner |
 | Agent cash-in/out network | 3 | Ledger logic tested (`test/agent.test.ts`); auth model unsafe (S2, S3) |
+| Bank top-up by transfer (reference → signed bank webhook or operator match) | 1 (sandbox) / 6 (live) | `cash/bank.service.ts`, `test/bank-collection.e2e.test.ts` (HTTP + Postgres: exactly-once credit, forged/replayed webhooks, operator-only manual confirm, own-reference cancel). Live needs a collection-bank account and agreement (`BANK_COLLECTION_ACCOUNTS`, `BANK_WEBHOOK_SECRET`). The uploaded version let any merchant owner credit any wallet and re-opened `/cash/in` and `/cash/out` under merchant tokens; both were fixed before merge. |
 | Merchant payouts (maker-checker) | 2 | `payouts.service.ts`; sandbox provider only, so live is (6) |
 | Bulk / payroll batches | 2 | `batches/*`; CSV parsing tested only |
 | Provider settlement-file import + matching | 1 (matcher) / 2 (import) | `reconciliation.service.ts` `reconcile`; `test/reconciliation.test.ts` |
