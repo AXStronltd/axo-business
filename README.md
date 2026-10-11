@@ -28,7 +28,7 @@ docs/       POS-API.md — integrating a till / POS, webhooks, refunds, reports.
 
 The Hub is plain HTML and JavaScript with no build step: `frontend/index.html` plus `frontend/live.js`. Serve the folder (or open `index.html` directly) and choose one of two modes:
 
-- **Sign in** with a business account (for example the seeded `owner@java.test` / `password123`). The Hub then talks to the real backend (set the address under **Server**, default `http://localhost:4000`) and shows:
+- **Sign in** with a business account (for example the seeded `owner@java.test` / `password123`). The Hub then talks to the real backend (set the address under **Server**; it defaults to `http://localhost:4000` when the Hub is opened locally and to the hosted API, `https://axo-business.onrender.com`, when opened from Netlify) and shows:
   - your real balance and today's takings
   - payment requests with a scannable QR, updating by themselves the moment the customer pays
   - payment toasts, transactions with refunds, and the daily settlement report with reconciliation

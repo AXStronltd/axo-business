@@ -18,7 +18,11 @@
 (function () {
   'use strict';
 
-  var DEFAULT_API = 'http://localhost:4000';
+  // Opened from this machine (or a file) ⇒ the local dev API; opened from the
+  // hosted site ⇒ the hosted API. ?api=… still overrides either.
+  var LOCAL_API = 'http://localhost:4000';
+  var HOSTED_API = 'https://axo-business.onrender.com';
+  var DEFAULT_API = (location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) ? LOCAL_API : HOSTED_API;
   var STORE = 'axo.hub.session';
   var API_KEY_STORE = 'axo.hub.apiBase';
 
